@@ -1,27 +1,29 @@
 <launch>
-   <node pkg="PF_nav" name="PF_nav" type="PF_nav" output="screen">
+   <group ns="PF_nav">
+      <node pkg="PF_nav" name="PF_nav" type="PF_nav" output="screen">
 
-      <!-- 制御周期 Hz -->
-      <param name="control_frequency"                       value="50.0"/>
+         <!-- 制御周期 Hz -->
+         <param name="control_frequency"                       value="50.0"/>
 
-      <!-- 生成するパーティクル数 -->
-      <param name="particle_num"                            value="1000"/>
+         <!-- 生成するパーティクル数 -->
+         <param name="particle_num"                            value="1000"/>
 
-      <!-- パーティクル移動時のノイズパラメータ -->
-      <param name="norm_noise_mean_linear_velocity"         value="0.0"/>
-      <param name="norm_noise_variance_linear_velocity"     value="0.1"/>
-      <param name="norm_noise_mean_angular_velocity"        value="0.0"/>
-      <param name="norm_noise_variance_angular_velocity"    value="0.1"/>
-      
-      <!-- 移動制御のパラメータ -->
-      <param name="gain_p"                                  value="1.0"/>
-      <param name="gain_i"                                  value="0.1"/>
-      <param name="gain_d"                                  value="0.001"/>
-      <param name="stop_margin_angle"                       value="0.01"/>
-      <param name="stop_margin_distance"                    value="0.03"/>
-      <param name="max_linear_velocity"                     value="0.5"/>
-      <param name="max_angular_velocity"                    value="0.6"/>
-   </node>
+         <!-- パーティクル移動時のノイズパラメータ -->
+         <param name="norm_noise_mean_linear_velocity"         value="0.0"/>
+         <param name="norm_noise_variance_linear_velocity"     value="0.1"/>
+         <param name="norm_noise_mean_angular_velocity"        value="0.0"/>
+         <param name="norm_noise_variance_angular_velocity"    value="0.1"/>
+         
+         <!-- 移動制御のパラメータ -->
+         <param name="gain_p"                                  value="1.0"/>
+         <param name="gain_i"                                  value="0.1"/>
+         <param name="gain_d"                                  value="0.001"/>
+         <param name="stop_margin_angle"                       value="0.01"/>
+         <param name="stop_margin_distance"                    value="0.03"/>
+         <param name="max_linear_velocity"                     value="0.5"/>
+         <param name="max_angular_velocity"                    value="0.6"/>
+      </node>
 
-   <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find controller_tutorial)/rviz/controller_tutorial.rviz"/>
+      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find controller_tutorial)/rviz/controller_tutorial.rviz"/>
+   </group>
 </launch>
