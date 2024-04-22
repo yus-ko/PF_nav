@@ -22,4 +22,7 @@ include_directories(
 add_executable(${PROJECT_NAME} src/PF_nav.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
+add_executable(class_tutorial src/class_tutorial.cpp)
+target_link_libraries(class_tutorial ${catkin_LIBRARIES})
+
 add_definitions(-std=c++14)
