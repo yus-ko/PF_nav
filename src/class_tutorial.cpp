@@ -4,11 +4,12 @@ class TestClass
 {
 private:
 	double position_x_ = 0;
+	void __add_num(double add);
 public:
 	double position_x_public = 0;
 	TestClass(double x = 0);
 	~TestClass();
-
+    
 	void print_num(double num = 0);
 };
 
@@ -23,6 +24,10 @@ TestClass::~TestClass()
 	ROS_INFO("delete TestClass");
 }
 
+void TestClass::__add_num(double add)
+{
+	position_x_ += add;
+}
 void TestClass::print_num(double num)
 {
 	ROS_INFO("num : %f", num);
