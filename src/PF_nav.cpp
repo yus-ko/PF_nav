@@ -7,6 +7,38 @@
 #include <random>
 
 std::vector<potbot_lib::Controller::DiffDriveController> g_robot;
+std::random_device g_rd;
+std::default_random_engine g_generator(g_rd());
+double g_norm_noise_mean_initial_particle_X = 0; //初期パーティクルに載せる正規分布平均(初期設定)
+double g_norm_noise_mean_initial_particle_Y = 0; //初期パーティクルに載せる正規分布平均(初期設定)
+double g_norm_noise_mean_initial_particle_yaw = 0; //初期パーティクルに載せる正規分布平均(初期設定)
+double g_norm_noise_variance_initial_particle_X = 0.1; //初期パーティクルに載せる正規分布分散(初期設定)
+double g_norm_noise_variance_initial_particle_Y = 0.1; //初期パーティクルに載せる正規分布分散(初期設定)
+double g_norm_noise_variance_initial_particle_yaw = 0.1; //初期パーティクルに載せる正規分布分散(初期設定)
+
+void init_particles()
+{
+	//<--追加要素-->
+	std::normal_distribution<double> distribution_initial_particle_X(g_norm_noise_mean_initial_particle_X, sqrt(g_norm_noise_variance_initial_particle_X));
+	std::normal_distribution<double> distribution_initial_particle_Y(g_norm_noise_mean_initial_particle_Y, sqrt(g_norm_noise_variance_initial_particle_Y));
+	std::normal_distribution<double> distribution_initial_particle_yaw(g_norm_noise_mean_initial_particle_yaw, sqrt(g_norm_noise_variance_initial_particle_yaw));
+
+    
+	//<--追加要素(パーティクル初期配置について)-->----------------------------------------------------------------------------------------------------------------------
+    for (size_t i = 1; i < g_robot.size(); i++){
+		
+		nav_msgs::Odometry particle;
+		g_robot[i].to_msg(particle);
+		
+		particle.pose.pose.position.x += distribution_initial_particle_X(g_generator);
+		particle.pose.pose.position.y += distribution_initial_particle_Y(g_generator);
+		double yaw = potbot_lib::utility::get_Yaw(particle.pose.pose.orientation) + distribution_initial_particle_yaw(g_generator);
+        particle.pose.pose.orientation = potbot_lib::utility::get_Quat(0,0,yaw);
+
+		g_robot[i].set_msg(particle);
+	}
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+}
 
 //どこからcallback(subscribe)しているのかを聞くこと----------------------------------------------------------------------------------------
 void inipose_callback(const geometry_msgs::PoseWithCovarianceStamped& msg)
@@ -15,6 +47,7 @@ void inipose_callback(const geometry_msgs::PoseWithCovarianceStamped& msg)
 	ini_pose.header.frame_id = "map" ;
 	ini_pose.pose = msg.pose;
 	for (auto& robo : g_robot) robo.set_msg(ini_pose); //ランダムでrobotの状態を設定、そのすべてにroboでアクセスオドメトリ等の定義設定
+	init_particles();
 }
 
 void goal_callback(const geometry_msgs::PoseStamped& msg)
@@ -37,7 +70,6 @@ void param_callback(const PF_nav::PF_navConfig& param, uint32_t level)
 							param.max_angular_velocity);
 }
 
-
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 //(ここから実際に使用するプログラム----------------------------------------------------------------------------------------------------------
@@ -52,13 +84,6 @@ int main(int argc,char **argv){
 	double norm_noise_variance_linear_velocity = 0.1; //速度に載せる正規分布分散(初期設定)
 	double norm_noise_mean_angular_velocity = 0; //角速度に載せる正規分布平均(初期設定)
 	double norm_noise_variance_angular_velocity = 0.1; //速度に載せる正規分布平均(初期設定)
-	//<--追加要素-->
-	double norm_noise_mean_initial_particle_X = 0; //初期パーティクルに載せる正規分布平均(初期設定)
-	double norm_noise_variance_initial_particle_X = 0.1; //初期パーティクルに載せる正規分布分散(初期設定)
-	double norm_noise_mean_initial_particle_Y = 0; //初期パーティクルに載せる正規分布平均(初期設定)
-	double norm_noise_variance_initial_particle_Y = 0.1; //初期パーティクルに載せる正規分布分散(初期設定)
-	double norm_noise_mean_initial_particle_yaw = 0; //初期パーティクルに載せる正規分布平均(初期設定)
-	double norm_noise_variance_initial_particle_yaw = 0.1; //初期パーティクルに載せる正規分布分散(初期設定)
 
 	n.getParam("control_frequency", control_frequency); //launchファイルから取得周期(50.0)
 	n.getParam("particle_num", particle_num); //launchファイルから取得パーティクル個数(1000)
@@ -67,12 +92,12 @@ int main(int argc,char **argv){
 	n.getParam("norm_noise_mean_angular_velocity", norm_noise_mean_angular_velocity); //launchファイルから取得角速度に載せる正規分布平均(0.0)
 	n.getParam("norm_noise_variance_angular_velocity", norm_noise_variance_angular_velocity); //launchファイルから速度に載せる正規分布平均(0.1)
 	//<--追加要素-->
-	n.getParam("norm_noise_mean_initial_particle_X", norm_noise_mean_initial_particle_X); //launchファイルから取得初期パーティクル(x座標)に載せる正規分布平均(0.0)変更予定
-	n.getParam("norm_noise_variance_initial_particle_X", norm_noise_variance_initial_particle_X); //launchファイルから取得初期パーティクル(x座標)に載せる正規分布分散(0.5)
-    n.getParam("norm_noise_mean_initial_particle_Y", norm_noise_mean_initial_particle_Y); //launchファイルから取得初期パーティクル(y座標)に載せる正規分布平均(0.0)変更予定
-	n.getParam("norm_noise_variance_initial_particle_Y", norm_noise_variance_initial_particle_Y); //launchファイルから取得初期パーティクル(y座標)に載せる正規分布分散(0.5)
-    n.getParam("norm_noise_mean_initial_particle_yaw", norm_noise_mean_initial_particle_yaw); //launchファイルから取得初期パーティクル(yaw)に載せる正規分布平均(0.0)変更予定
-	n.getParam("norm_noise_variance_initial_particle_yaw", norm_noise_variance_initial_particle_yaw); //launchファイルから取得初期パーティクル(yaw)に載せる正規分布分散(3.0 * M_PI / 180.0)
+	n.getParam("norm_noise_mean_initial_particle_X", g_norm_noise_mean_initial_particle_X); //launchファイルから取得初期パーティクル(x座標)に載せる正規分布平均(0.0)変更予定
+	n.getParam("norm_noise_variance_initial_particle_X", g_norm_noise_variance_initial_particle_X); //launchファイルから取得初期パーティクル(x座標)に載せる正規分布分散(0.5)
+    n.getParam("norm_noise_mean_initial_particle_Y", g_norm_noise_mean_initial_particle_Y); //launchファイルから取得初期パーティクル(y座標)に載せる正規分布平均(0.0)変更予定
+	n.getParam("norm_noise_variance_initial_particle_Y", g_norm_noise_variance_initial_particle_Y); //launchファイルから取得初期パーティクル(y座標)に載せる正規分布分散(0.5)
+    n.getParam("norm_noise_mean_initial_particle_yaw", g_norm_noise_mean_initial_particle_yaw); //launchファイルから取得初期パーティクル(yaw)に載せる正規分布平均(0.0)変更予定
+	n.getParam("norm_noise_variance_initial_particle_yaw", g_norm_noise_variance_initial_particle_yaw); //launchファイルから取得初期パーティクル(yaw)に載せる正規分布分散(3.0 * M_PI / 180.0)
 
 	g_robot.resize(particle_num+1); //grobotの数の定義(ロボット実機の個数も想定するためP_num+1)
 
@@ -105,50 +130,28 @@ int main(int argc,char **argv){
 	potbot_msgs::ObstacleArray particle_state_msg; //particle_state_msg定義(ObstacleArrey型)
 	particle_state_msg.header.frame_id = robot_pose.header.frame_id; //tfに関することなんだろうけど詳しくは小池さんに聞いて(mapに設定してる)
 	
-
-	for (size_t i = 0; i < particle_num; i++) 
-	{
-		particles_msg.poses.push_back(robot_pose.pose.pose);
-		potbot_msgs::Obstacle p;
-		p.pose = robot_pose.pose.pose;
-		particle_state_msg.data.push_back(p);
-	};
-
 	for (auto& robo : g_robot)
 	{
 		robo.deltatime = 1.0/control_frequency;;
 		robo.set_msg(robot_pose);
 	}
 
-	std::random_device rd;
-    std::default_random_engine generator(rd());
+	init_particles();
+
+	for (size_t i = 0; i < particle_num; i++) 
+	{
+		nav_msgs::Odometry odom;
+		g_robot[i+1].to_msg(odom);
+		particles_msg.poses.push_back(odom.pose.pose);
+		potbot_msgs::Obstacle p;
+		p.pose = odom.pose.pose;
+		particle_state_msg.data.push_back(p);
+	};
+
+	
+
     std::normal_distribution<double> distribution_linear_velocity(norm_noise_mean_linear_velocity, sqrt(norm_noise_variance_linear_velocity));
 	std::normal_distribution<double> distribution_angular_velocity(norm_noise_mean_angular_velocity, sqrt(norm_noise_variance_angular_velocity));
-    //<--追加要素-->
-	std::normal_distribution<double> distribution_initial_particle_X(norm_noise_mean_initial_particle_X, sqrt(norm_noise_variance_initial_particle_X));
-	std::normal_distribution<double> distribution_initial_particle_Y(norm_noise_mean_initial_particle_Y, sqrt(norm_noise_variance_initial_particle_Y));
-	std::normal_distribution<double> distribution_initial_particle_yaw(norm_noise_mean_initial_particle_yaw, sqrt(norm_noise_variance_initial_particle_yaw));
-
-    
-	//<--追加要素(パーティクル初期配置について)-->----------------------------------------------------------------------------------------------------------------------
-    for (size_t i = 1; i < particle_num+1; i++){
-		double yaw = 0.0;
-		nav_msgs::Odometry particle;
-		g_robot[i].to_msg(particle);
-		
-		particle.pose.pose.position.x = distribution_initial_particle_X(generator);
-		particle.pose.pose.position.y = distribution_initial_particle_Y(generator);
-		yaw = distribution_initial_particle_yaw(generator);
-        particle.pose.pose.orientation = potbot_lib::utility::get_Quat(0,0,yaw);
-
-		g_robot[i].set_msg(particle);
-		
-		particles_msg.poses[i-1] = particle.pose.pose;
-
-		particle_state_msg.data[i-1].pose = particle.pose.pose;
-		particle_state_msg.data[i-1].twist = particle.twist.twist;
-	}
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------------
     
 	// //<--追加要素(マーカーの配置、座標について)>-----------------------------------------------------------------------------------------------------------------------
 	// void Marker_callback(const visualization_msgs::MarkerArray& Marker_msg){
@@ -157,6 +160,8 @@ int main(int argc,char **argv){
 	// }
 
     // //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	
 
 	while (ros::ok())
 	{
@@ -170,8 +175,8 @@ int main(int argc,char **argv){
 		particle_state_msg.header = robot_pose.header;
 		double v_truth = robot_pose.twist.twist.linear.x;
 		double omega_truth = robot_pose.twist.twist.angular.z;
-		double v_noise = v_truth + distribution_linear_velocity(generator); //(変更点::パーティクルに載せる速度は一定)
-		double omega_noise = omega_truth + distribution_angular_velocity(generator); //(変更点::パーティクルに載せる角速度は一定)
+		double v_noise = v_truth + distribution_linear_velocity(g_generator); //(変更点::パーティクルに載せる速度は一定)
+		double omega_noise = omega_truth + distribution_angular_velocity(g_generator); //(変更点::パーティクルに載せる角速度は一定)
 
 		if (v_truth != 0 || omega_truth != 0)
 		{
