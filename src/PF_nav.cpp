@@ -6,6 +6,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <random>
 
+
 std::vector<potbot_lib::Controller::DiffDriveController> g_robot;
 
 void inipose_callback(const geometry_msgs::PoseWithCovarianceStamped& msg)
