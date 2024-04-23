@@ -22,8 +22,8 @@ include_directories(
 add_executable(${PROJECT_NAME} src/PF_nav.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-add_executable(${PROJECT_NAME} src/PF_Marker.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+add_executable(${PROJECT_NAME}_Marker src/PF_Marker.cpp)
+target_link_libraries(${PROJECT_NAME}_Marker ${catkin_LIBRARIES})
 
 add_executable(class_tutorial src/class_tutorial.cpp)
 target_link_libraries(class_tutorial ${catkin_LIBRARIES})

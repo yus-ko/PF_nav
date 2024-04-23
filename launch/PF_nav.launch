@@ -24,9 +24,12 @@
          <param name="max_angular_velocity"                    value="0.6"/>
       </node>
 
-      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find controller_tutorial)/rviz/controller_tutorial.rviz"/>
+      <arg name="rvizconfig" default="$(find info_lecture)/rviz/marker1.rviz"/>
+      <node pkg="PF_nav" name="info_marker_publisher1" type="info_marker_publisher1" output="screen"/>
+      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(arg rvizconfig)"/>
 
-      <node pkg="PF_nav" name="info_marker_publisher1" type="info_marker_publisher1" output="screen">
+
+      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find controller_tutorial)/rviz/controller_tutorial.rviz"/>
 
    </group>
 </launch>
