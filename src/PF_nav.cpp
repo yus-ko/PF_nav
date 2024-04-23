@@ -40,7 +40,7 @@ void init_particles()
     //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
 
-//どこからcallback(subscribe)しているのかを聞くこと----------------------------------------------------------------------------------------
+//rviz関連のcallback関数----------------------------------------------------------------------------------------------------------------------------------------------
 void inipose_callback(const geometry_msgs::PoseWithCovarianceStamped& msg)
 {
 	nav_msgs::Odometry ini_pose;
@@ -69,6 +69,18 @@ void param_callback(const PF_nav::PF_navConfig& param, uint32_t level)
 	g_robot[0].set_limit(	param.max_linear_velocity,
 							param.max_angular_velocity);
 }
+
+
+// //<--追加要素(マーカーの配置、座標について)>-----------------------------------------------------------------------------------------------------------------------
+// 	void Marker_callback(const visualization_msgs::MarkerArray& Marker_msg){
+// 		std::vector<geometry_msgs::Point> points = Marker_msg->points;
+
+// 	}
+
+// //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -153,15 +165,6 @@ int main(int argc,char **argv){
     std::normal_distribution<double> distribution_linear_velocity(norm_noise_mean_linear_velocity, sqrt(norm_noise_variance_linear_velocity));
 	std::normal_distribution<double> distribution_angular_velocity(norm_noise_mean_angular_velocity, sqrt(norm_noise_variance_angular_velocity));
     
-	// //<--追加要素(マーカーの配置、座標について)>-----------------------------------------------------------------------------------------------------------------------
-	// void Marker_callback(const visualization_msgs::MarkerArray& Marker_msg){
-	// 	std::vector<geometry_msgs::Point> points = Marker_msg->points;
-
-	// }
-
-    // //---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-	
 
 	while (ros::ok())
 	{
