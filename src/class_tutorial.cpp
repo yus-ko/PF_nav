@@ -30,6 +30,7 @@ void TestClass::__add_num(double add)
 }
 void TestClass::print_num(double num)
 {
+	__add_num(num);
 	ROS_INFO("num : %f", num);
 	ROS_INFO("x : %f", position_x_);
 	ROS_INFO("x public : %f", position_x_public);
@@ -42,6 +43,7 @@ int main(int argc,char **argv){
 
 	TestClass tc(4);
 	tc.position_x_public = 2.3;
+
 	tc.print_num(4.7);
 	delete &tc;
 
