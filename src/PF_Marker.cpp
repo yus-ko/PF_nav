@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <potbot_lib/Utility.h>
 
 #include <string>
 #include <math.h>
@@ -11,6 +12,22 @@ int main(int argc, char** argv)
 
   // publisher
   ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("marker", 1);
+
+  ros::NodeHandle n("~");
+  std::vector<geometry_msgs::Pose> marker_pose;
+  std::vector<geometry_msgs::Vector3> marker_scale;
+  size_t id = 0;
+  while (1)
+  {
+    std::string param_name = "marker" + std::to_string(id);
+    if(!n.hasParam(param_name + "/x")) break;
+    double x,y,yaw_deg;
+    n.getParam(param_name + "/x", x);
+    n.getParam(param_name + "/y", y);
+    n.getParam(param_name + "/yaw", yaw_deg);
+    marker_pose.push_back(potbot_lib::utility::get_Pose(x,y,0,0,0,yaw_deg/180.0*M_PI));
+    id++;
+  }
 
   ros::Rate loop_rate(10);
   while (ros::ok())
@@ -25,20 +42,14 @@ int main(int argc, char** argv)
     marker.action = visualization_msgs::Marker::ADD;
     marker.lifetime = ros::Duration();
 
+    double t = marker.header.stamp.toSec();
+
     marker.scale.x = 0.5;
     marker.scale.y = 0.5;
     marker.scale.z = 0.2;
-    marker.pose.position.x = 0;
-    marker.pose.position.y = 0;
-    marker.pose.position.z = 0;
-    marker.pose.orientation.x = 0;
-    marker.pose.orientation.y = 0;
-    marker.pose.orientation.z = 0;
-    marker.pose.orientation.w = 1;
-    marker.color.r = 0.0f;
-    marker.color.g = 1.0f;
-    marker.color.b = 0.0f;
-    marker.color.a = 1.0f;
+    
+    marker.pose = marker_pose[0];
+    marker.color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
     marker_pub.publish(marker);
 
     ros::spinOnce();
