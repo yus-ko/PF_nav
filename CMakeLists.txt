@@ -28,4 +28,7 @@ target_link_libraries(${PROJECT_NAME}_Marker ${catkin_LIBRARIES})
 add_executable(class_tutorial src/class_tutorial.cpp)
 target_link_libraries(class_tutorial ${catkin_LIBRARIES})
 
+add_executable(class_tutorial src/PF_MarkerArray.cpp)
+target_link_libraries(class_tutorial ${catkin_LIBRARIES})
+
 add_definitions(-std=c++14)

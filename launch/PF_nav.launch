@@ -24,7 +24,7 @@
          <param name="max_angular_velocity"                    value="0.6"/>
       </node>
 
-      <node pkg="PF_nav" name="PF_nav_Marker" type="PF_nav_Marker" output="screen">
+      <node pkg="PF_nav" name="PF_nav_MarkerArray" type="PF_nav_MarkerArray" output="screen">
          <rosparam command="load" file="$(find PF_nav)/yaml/markers.yaml"/>
       </node>
 
