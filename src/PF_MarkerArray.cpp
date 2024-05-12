@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     marker_array.markers[1].header.frame_id = "map";
     marker_array.markers[1].header.stamp = ros::Time::now();
     marker_array.markers[1].ns = "basic_shapes";
-    marker_array.markers[1].id = 0;
+    marker_array.markers[1].id = 1;
 
     marker_array.markers[1].type = visualization_msgs::Marker::CUBE;
     marker_array.markers[1].action = visualization_msgs::Marker::ADD;
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     marker_array.markers[2].header.frame_id = "map";
     marker_array.markers[2].header.stamp = ros::Time::now();
     marker_array.markers[2].ns = "basic_shapes";
-    marker_array.markers[2].id = 0;
+    marker_array.markers[2].id = 2;
 
     marker_array.markers[2].type = visualization_msgs::Marker::CUBE;
     marker_array.markers[2].action = visualization_msgs::Marker::ADD;
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     marker_array.markers[2].scale.y = 0.5;
     marker_array.markers[2].scale.z = 0.2;
     
-    marker_array.markers[2].pose = marker_pose[0];
+    marker_array.markers[2].pose = marker_pose[2];
     marker_array.markers[2].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
     
     marker_pub.publish(marker_array);
