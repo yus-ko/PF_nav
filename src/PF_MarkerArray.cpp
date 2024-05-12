@@ -35,11 +35,7 @@ int main(int argc, char** argv)
   while (ros::ok())
   {
     visualization_msgs::MarkerArray marker_array;
-<<<<<<< HEAD
     marker_array.marker.resize(3)
-=======
-    marker_array.markers.resize(2);
->>>>>>> 6b932314478d3eef48d18c344a5f60d4871e9cc4
 
     marker_array.markers[0].header.frame_id = "map";
     marker_array.markers[0].header.stamp = ros::Time::now();
