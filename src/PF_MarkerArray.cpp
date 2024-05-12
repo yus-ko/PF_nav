@@ -35,7 +35,7 @@ int main(int argc, char** argv)
   while (ros::ok())
   {
     visualization_msgs::MarkerArray marker_array;
-    marker_array.marker.resize(2)
+    marker_array.marker.resize(3)
 
     marker_array.markers[0].header.frame_id = "map";
     marker_array.markers[0].stamp = ros::Time::now();
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
     marker_array.markers[0].action = visualization_msgs::Marker::ADD;
     marker_array.markers[0].lifetime = ros::Duration();
 
-    double t = marker.header.stamp.toSec();
+    //double t = marker.header.stamp.toSec();
 
     marker_array.markers[0].scale.x = 0.5;
     marker_array.markers[0].scale.y = 0.5;
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     marker_array.markers[1].action = visualization_msgs::Marker::ADD;
     marker_array.markers[1].lifetime = ros::Duration();
 
-    double t = marker.header.stamp.toSec();
+    //double t = marker.header.stamp.toSec();
 
     marker_array.markers[1].scale.x = 0.5;
     marker_array.markers[1].scale.y = 0.5;
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     marker_array.markers[2].action = visualization_msgs::Marker::ADD;
     marker_array.markers[2].lifetime = ros::Duration();
 
-    double t = marker.header.stamp.toSec();
+    //double t = marker.header.stamp.toSec();
 
     marker_array.markers[2].scale.x = 0.5;
     marker_array.markers[2].scale.y = 0.5;
