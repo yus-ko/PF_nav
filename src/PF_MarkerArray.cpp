@@ -13,7 +13,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   // publisher
-  ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("marker", 1);
+  ros::Publisher marker_pub = nh.advertise<visualization_msgs::MarkerArray>("marker", 1);
 
   ros::NodeHandle n("~");
   std::vector<geometry_msgs::Pose> marker_pose;
@@ -34,64 +34,64 @@ int main(int argc, char** argv)
   ros::Rate loop_rate(10);
   while (ros::ok())
   {
-    visualization_msgs::MarkerArray marker_array;
-    marker_array.markers.resize(3);
+    visualization_msgs::MarkerArray marker;
+    marker.markers.resize(3);
 
-    marker_array.markers[0].header.frame_id = "map";
-    marker_array.markers[0].header.stamp = ros::Time::now();
-    marker_array.markers[0].ns = "basic_shapes";
-    marker_array.markers[0].id = 0;
+    marker.markers[0].header.frame_id = "map";
+    marker.markers[0].header.stamp = ros::Time::now();
+    marker.markers[0].ns = "basic_shapes";
+    marker.markers[0].id = 0;
 
-    marker_array.markers[0].type = visualization_msgs::Marker::CUBE;
-    marker_array.markers[0].action = visualization_msgs::Marker::ADD;
-    marker_array.markers[0].lifetime = ros::Duration();
-
-    //double t = marker.header.stamp.toSec();
-
-    marker_array.markers[0].scale.x = 0.5;
-    marker_array.markers[0].scale.y = 0.5;
-    marker_array.markers[0].scale.z = 0.2;
-    
-    marker_array.markers[0].pose = marker_pose[0];
-    marker_array.markers[0].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
-    
-    marker_array.markers[1].header.frame_id = "map";
-    marker_array.markers[1].header.stamp = ros::Time::now();
-    marker_array.markers[1].ns = "basic_shapes";
-    marker_array.markers[1].id = 1;
-
-    marker_array.markers[1].type = visualization_msgs::Marker::CUBE;
-    marker_array.markers[1].action = visualization_msgs::Marker::ADD;
-    marker_array.markers[1].lifetime = ros::Duration();
+    marker.markers[0].type = visualization_msgs::Marker::CUBE;
+    marker.markers[0].action = visualization_msgs::Marker::ADD;
+    marker.markers[0].lifetime = ros::Duration();
 
     //double t = marker.header.stamp.toSec();
 
-    marker_array.markers[1].scale.x = 0.5;
-    marker_array.markers[1].scale.y = 0.5;
-    marker_array.markers[1].scale.z = 0.2;
+    marker.markers[0].scale.x = 0.5;
+    marker.markers[0].scale.y = 0.5;
+    marker.markers[0].scale.z = 0.2;
     
-    marker_array.markers[1].pose = marker_pose[1];
-    marker_array.markers[1].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
+    marker.markers[0].pose = marker_pose[0];
+    marker.markers[0].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
+    
+    marker.markers[1].header.frame_id = "map";
+    marker.markers[1].header.stamp = ros::Time::now();
+    marker.markers[1].ns = "basic_shapes";
+    marker.markers[1].id = 1;
 
-    marker_array.markers[2].header.frame_id = "map";
-    marker_array.markers[2].header.stamp = ros::Time::now();
-    marker_array.markers[2].ns = "basic_shapes";
-    marker_array.markers[2].id = 2;
-
-    marker_array.markers[2].type = visualization_msgs::Marker::CUBE;
-    marker_array.markers[2].action = visualization_msgs::Marker::ADD;
-    marker_array.markers[2].lifetime = ros::Duration();
+    marker.markers[1].type = visualization_msgs::Marker::CUBE;
+    marker.markers[1].action = visualization_msgs::Marker::ADD;
+    marker.markers[1].lifetime = ros::Duration();
 
     //double t = marker.header.stamp.toSec();
 
-    marker_array.markers[2].scale.x = 0.5;
-    marker_array.markers[2].scale.y = 0.5;
-    marker_array.markers[2].scale.z = 0.2;
+    marker.markers[1].scale.x = 0.5;
+    marker.markers[1].scale.y = 0.5;
+    marker.markers[1].scale.z = 0.2;
     
-    marker_array.markers[2].pose = marker_pose[2];
-    marker_array.markers[2].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
+    marker.markers[1].pose = marker_pose[1];
+    marker.markers[1].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
+
+    marker.markers[2].header.frame_id = "map";
+    marker.markers[2].header.stamp = ros::Time::now();
+    marker.markers[2].ns = "basic_shapes";
+    marker.markers[2].id = 2;
+
+    marker.markers[2].type = visualization_msgs::Marker::CUBE;
+    marker.markers[2].action = visualization_msgs::Marker::ADD;
+    marker.markers[2].lifetime = ros::Duration();
+
+    //double t = marker.header.stamp.toSec();
+
+    marker.markers[2].scale.x = 0.5;
+    marker.markers[2].scale.y = 0.5;
+    marker.markers[2].scale.z = 0.2;
     
-    marker_pub.publish(marker_array);
+    marker.markers[2].pose = marker_pose[2];
+    marker.markers[2].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
+    
+    marker_pub.publish(marker);
 
     ros::spinOnce();
     loop_rate.sleep();
