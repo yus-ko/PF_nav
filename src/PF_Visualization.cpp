@@ -6,7 +6,7 @@
 #include <PF_nav/PF_navConfig.h>
 #include <geometry_msgs/PoseArray.h>
 #include <random>
-#include <Visualization_msgs>
+#include <visualization_msgs/MarkerArray.h>
 
 std::vector<geometry_msgs::Pose> marker_positions;
 
@@ -19,14 +19,14 @@ void Marker_callback(const visualization_msgs::MarkerArray& marker)
 
         marker_positions.push_back(marker_pose);
 
-        Ros_INFO("Marker ID: %d, Position: [x: %f, y: %f, z: %f]", 
+        ROS_INFO("Marker ID: %d, Position: [x: %f, y: %f, z: %f]", 
                   marker.id, marker_pose.position.x, marker_pose.position.y, marker_pose.position.z);
     }
 }
 
-int main(int argc, char argv)
+int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "marker_position_extractor");
+    ros::init(argc, argv, "marker_Visualization");
     ros::NodeHandle n;
 
     // サブスクライバの作成
