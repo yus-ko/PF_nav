@@ -11,9 +11,11 @@
 std::vector<geometry_msgs::Pose> marker_positions;
 
 
-void Marker_callback(const visualization_msgs::MarkerArray& marker)
-{
-	for(const auto& marker : marker.markers)
+void Marker_callback(const visualization_msgs::MarkerArray& marker_array)
+{   
+    marker_positions.clear();
+    
+	for(const auto& marker : marker_array.markers)
     {
         geometry_msgs::Pose marker_pose = marker.pose;
 
@@ -30,7 +32,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     // サブスクライバの作成
-    ros::Subscriber sub = n.subscribe("marker_topic", 1000, Marker_callback);
+    ros::Subscriber sub = n.subscribe("marker", 1000, Marker_callback);
 
     // ROSのイベントループを開始
     ros::spin();
