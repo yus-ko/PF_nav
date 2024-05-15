@@ -30,15 +30,18 @@ void Marker_callback(const visualization_msgs::MarkerArray& marker_array)
     }
 }
 
-void RobotPose_Callback(const nav_msgs::Odometry& odom)
+void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 {
-    nav_msgs::Odometry odom_pose ;
+    //nav_msgs::Odometry odom_pose ;
     
     double x = odom_pose.pose.pose.position.x;
     double y = odom_pose.pose.pose.position.y;
     double z = odom_pose.pose.pose.position.z;
 
-    double yaw = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation)
+    double yaw = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation);
+    
+    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", x, y, z);
+    ROS_INFO("Orientation (RPY): yaw=%.2f", yaw);
 
 }
 
@@ -48,13 +51,9 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     // サブスクライバの作成
-    ros::Subscriber sub = nh.subscribe("marker", 1000, Marker_callback);
-    ros::Subscriber sub = nh.Subscribe('robot_pose', 1000, RobotPose_Callback);
+    ros::Subscriber sub_marker = nh.subscribe("marker", 1000, Marker_callback);
+    ros::Subscriber sub_robot_pose = nh.subscribe("robot_pose", 1000, RobotPose_Callback);
 
-    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", x, y, z);
-    ROS_INFO("Orientation (RPY): yaw=%.2f", yaw);
-
-    // ROSのイベントループを開始
     ros::spin();
 
     return 0;
