@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 
     // サブスクライバの作成
     ros::Subscriber sub_marker = nh.subscribe("marker", 1000, Marker_callback);
-    ros::Subscriber sub_robot_pose = nh.subscribe("robot_pose", 1000, RobotPose_Callback);
+    ros::Subscriber sub_robot_pose = nh.subscribe("odom", 1000, RobotPose_Callback);
 
     ros::spin();
 
