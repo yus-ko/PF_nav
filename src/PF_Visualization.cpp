@@ -50,11 +50,11 @@ void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 {
     //nav_msgs::Odometry odom_pose ;
     
-    double x = odom_pose.pose.pose.position.x;
-    double y = odom_pose.pose.pose.position.y;
-    double z = odom_pose.pose.pose.position.z;
+    double robot_pose_x = odom_pose.pose.pose.position.x;
+    double robot_pose_y = odom_pose.pose.pose.position.y;
+    double robot_pose_z = odom_pose.pose.pose.position.z;
 
-    double yaw = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation);
+    double robot_pose_yaw = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation);
     
 
 }
@@ -73,10 +73,11 @@ int main(int argc, char** argv)
     ros::Subscriber sub_marker = nh.subscribe("marker", 1000, Marker_callback);
     ros::Subscriber sub_robot_pose = nh.subscribe("odom", 1000, RobotPose_Callback);
 
-    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", x, y, z);
-    ROS_INFO("Orientation (RPY): yaw=%.2f", yaw);
-
     ros::spin();
+    
+    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", robot_pose_x, robot_pose_y, robot_pose_z);
+    ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
+
 
     return 0;
 }
