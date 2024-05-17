@@ -14,6 +14,22 @@
 
 std::vector<geometry_msgs::Pose> marker_positions;
 
+double robot_pose_x = 0.0, robot_pose_y = 0.0, robot_pose_z = 0.0, robot_pose_yaw = 0.0;
+double radius = 0.0, start_angle = 0.0, end_angle = 0.0;
+
+// struct Point {
+//     double x, y;
+// };
+
+// struct Sector {
+//     Point center;     // 中心点
+//     double radius;    // 半径
+//     double start_angle; // 開始角度 (ラジアン)
+//     double end_angle;   // 終了角度 (ラジアン)
+
+//     Sector(Point c, double r, double start, double end)
+//         : center(c), radius(r), start_angle(start), end_angle(end) {}
+// };
 
 void Marker_callback(const visualization_msgs::MarkerArray& marker_array)
 {   
@@ -40,8 +56,11 @@ void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 
     double yaw = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation);
     
-    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", x, y, z);
-    ROS_INFO("Orientation (RPY): yaw=%.2f", yaw);
+
+}
+
+bool within_range_detection(){
+
 
 }
 
@@ -53,6 +72,9 @@ int main(int argc, char** argv)
     // サブスクライバの作成
     ros::Subscriber sub_marker = nh.subscribe("marker", 1000, Marker_callback);
     ros::Subscriber sub_robot_pose = nh.subscribe("odom", 1000, RobotPose_Callback);
+
+    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", x, y, z);
+    ROS_INFO("Orientation (RPY): yaw=%.2f", yaw);
 
     ros::spin();
 
