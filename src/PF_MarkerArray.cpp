@@ -48,9 +48,9 @@ int main(int argc, char** argv)
 
     //double t = marker.header.stamp.toSec();
 
-    marker.markers[0].scale.x = 0.5;
-    marker.markers[0].scale.y = 0.5;
-    marker.markers[0].scale.z = 0.2;
+    marker.markers[0].scale.x = 0.196;
+    marker.markers[0].scale.y = 0.196;
+    marker.markers[0].scale.z = 0.395;
     
     marker.markers[0].pose = marker_pose[0];
     marker.markers[0].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
@@ -66,9 +66,9 @@ int main(int argc, char** argv)
 
     //double t = marker.header.stamp.toSec();
 
-    marker.markers[1].scale.x = 0.5;
-    marker.markers[1].scale.y = 0.5;
-    marker.markers[1].scale.z = 0.2;
+    marker.markers[1].scale.x = 0.196;
+    marker.markers[1].scale.y = 0.196;
+    marker.markers[1].scale.z = 0.395;
     
     marker.markers[1].pose = marker_pose[1];
     marker.markers[1].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
@@ -84,9 +84,9 @@ int main(int argc, char** argv)
 
     //double t = marker.header.stamp.toSec();
 
-    marker.markers[2].scale.x = 0.5;
-    marker.markers[2].scale.y = 0.5;
-    marker.markers[2].scale.z = 0.2;
+    marker.markers[2].scale.x = 0.196;
+    marker.markers[2].scale.y = 0.196;
+    marker.markers[2].scale.z = 0.395;
     
     marker.markers[2].pose = marker_pose[2];
     marker.markers[2].color = potbot_lib::color::get_msg(potbot_lib::color::LIGHT_BLUE);
