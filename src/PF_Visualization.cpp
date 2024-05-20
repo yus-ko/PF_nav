@@ -15,7 +15,7 @@
 std::vector<geometry_msgs::Pose> marker_positions;
 
 double robot_pose_x = 0.0, robot_pose_y = 0.0, robot_pose_z = 0.0, robot_pose_yaw = 0.0;
-double radius = 0.0, start_angle = 0.0, end_angle = 0.0;
+double radius = 3.0, start_angle = 0.0, end_angle = 0.0, angle_area = 85.2 * pi() / 180;
 
 // struct Point {
 //     double x, y;
@@ -48,7 +48,7 @@ void Marker_callback(const visualization_msgs::MarkerArray& marker_array)
 
 void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 {
-    //nav_msgs::Odometry odom_pose ;
+    geometry_msgs::Pose odom_pose = odom.pose
     
     double robot_pose_x = odom_pose.pose.pose.position.x;
     double robot_pose_y = odom_pose.pose.pose.position.y;
@@ -59,10 +59,36 @@ void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 
 }
 
-bool within_range_detection(){
+// bool within_range_detection(){
+//     for(const auto& marker : marker_array.markers)
+//     {
+//         double dx = robot_pose_x - marker_pose.position.x;
+//         double dy = robot_pose_y - marker_pose.position.y;
+//         double distance = std::sqrt(dx * dx + dy * dy);
+        
+//         if(distance > radius){
+//             return false;
+//         }
 
+//         double angle = std::atan2(dy, dx);
+//         if (angle < 0){
+//             angle += 2 * M_PI;
+//         }
 
-}
+//         double start_angle = robot_pose_yaw - angle_area / 2;
+//         double end_angle = robot_pose_yaw + angle_area / 2;
+
+//         if (start_angle < 0) start_angle += 2 * M_PI;
+//         if (end_angle >= 2 * M_PI) end_angle -= 2 * M_PI;
+        
+//         if (sector.start_angle < sector.end_angle) {
+//             return sector.start_angle <= angle && angle <= sector.end_angle;
+//         } else {
+//             return sector.start_angle <= angle || angle <= sector.end_angle;
+//         }
+//     } 
+
+// }
 
 int main(int argc, char** argv)
 {
@@ -73,11 +99,14 @@ int main(int argc, char** argv)
     ros::Subscriber sub_marker = nh.subscribe("marker", 1000, Marker_callback);
     ros::Subscriber sub_robot_pose = nh.subscribe("odom", 1000, RobotPose_Callback);
 
-    ros::spin();
-    
-    ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", robot_pose_x, robot_pose_y, robot_pose_z);
-    ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
+    while(ros::ok())
+    {
+        ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", robot_pose_x, robot_pose_y, robot_pose_z);
+        ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
 
+        ros::spinOnce();
+        rate.sleep();
+    }
 
     return 0;
 }
