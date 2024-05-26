@@ -11,8 +11,16 @@
 #include <cmath>
 #include <vector>
 #include <math.h>
+#include <nav_msgs/Odometry.h>
+#include <algorithm> 
+#include <fstream>
+
+ofstream record_start_angle("/home/ros/catkin_ws/src/user/src/date/simulator/record_start_angle_txt");
+ofstream record_end_angle("/home/ros/catkin_ws/src/user/src/date/record_end_angle_txt");
+ofstream record_robot_pose_yaw("/home/ros/catkin_ws/src/user/src/date/record_robot_pose_yaw_txt");
 
 std::vector<geometry_msgs::Pose> marker_positions;
+std::vector<int> marker_ids;;
 
 double robot_pose_x = 0.0, robot_pose_y = 0.0, robot_pose_z = 0.0, robot_pose_yaw = 0.0;
 double radius = 3.0, start_angle = 0.0, end_angle = 0.0, angle_area = 85.2 * M_PI / 180;
@@ -21,11 +29,13 @@ double radius = 3.0, start_angle = 0.0, end_angle = 0.0, angle_area = 85.2 * M_P
 void Marker_callback(const visualization_msgs::MarkerArray& marker_array)
 {   
     marker_positions.clear();
+    marker_ids.clear();
 
 	for(const auto& marker : marker_array.markers)
     {
         geometry_msgs::Pose marker_pose = marker.pose;
-
+        
+        marker_ids.push_back(marker.id);
         marker_positions.push_back(marker_pose);
 
         // ROS_INFO("Marker ID: %d, Position: [x: %f, y: %f, z: %f]", 
@@ -47,14 +57,15 @@ void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 
 std::vector<int> within_range_detection(){
     std::vector<int> in_range_ids;
-    for(const auto& marker_pose : marker_positions)
+    for(size_t i = 0; i < marker_positions.size(); ++i)
     {
+        const auto& marker_pose = marker_positions[i];
         double dx = robot_pose_x - marker_pose.position.x;
         double dy = robot_pose_y - marker_pose.position.y;
         double distance = std::sqrt(dx * dx + dy * dy);
         
         if(distance > radius){
-            return false;
+            continue;
         }
 
         double angle = std::atan2(dy, dx);
@@ -64,21 +75,24 @@ std::vector<int> within_range_detection(){
 
         double start_angle = robot_pose_yaw - angle_area / 2;
         double end_angle = robot_pose_yaw + angle_area / 2;
+        
+        record_start_angle << start_angle  << std :: endl;
+        record_end_angle << end_angle  << std :: endl;
+        record_robot_pose_yaw << robot_pose_yaw   << std :: endl;
 
         if (start_angle < 0) start_angle += 2 * M_PI;
         if (end_angle >= 2 * M_PI) end_angle -= 2 * M_PI;
         
-        if (start_angle < end_angle) {
-            if( start_angle <= angle && angle <= end_angle){
-                return true;
-            };
-        } else {
-            if (start_angle <= angle || angle <= end_angle){
-                return true;
-            };
+        if((start_angle < end_angle && start_angle <= angle && angle <= end_angle) || (start_angle >= end_angle && (start_angle <= angle || angle <= end_angle)))
+        {
+            in_range_ids.push_back(marker_ids[i]);
         }
     } 
-    return false;
+    return in_range_ids;
+}
+
+void Visualization_mode(const geometry_msgs::Pose& marker){
+    std::cout <<  "at position (" << marker.position.x << ", " << marker.position.y << ")" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -96,14 +110,31 @@ int main(int argc, char** argv)
     {
         // ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", robot_pose_x, robot_pose_y, robot_pose_z);
         // ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
-        
-        if (within_range_detection()) {
-        std::cout << "All markers are within range and angle." << std::endl;
-        // 範囲内にある場合の処理
-        } else {
-        std::cout << "At least one marker is out of range or angle." << std::endl;
-        // 範囲外にある場合の処理
+        std::vector<int> in_range_ids = within_range_detection();
+
+        if (! in_range_ids.empty()){
+            std::cout << "Markers within range and angle ";
+            for(int id : in_range_ids){
+                std::cout << id << "  ";
+            }
+            std::cout << std::endl;
+
+            for(size_t i = 0; i < marker_positions.size(); ++i) {
+                if(std::find(in_range_ids.begin(), in_range_ids.end(), marker_ids[i]) != in_range_ids.end()){
+                    Visualization_mode(marker_positions[i]);
+                }
+            }
+        }else {
+            std::cout << "No markers are within range or angle." << std::endl;
         }
+
+        // if (within_range_detection()) {
+        // std::cout << "All markers are within range and angle." << std::endl;
+        // // 範囲内にある場合の処理
+        // } else {
+        // std::cout << "At least one marker is out of range or angle." << std::endl;
+        // // 範囲外にある場合の処理
+        // }
 
         ros::spinOnce();
         rate.sleep();
