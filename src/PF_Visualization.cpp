@@ -15,9 +15,10 @@
 #include <algorithm> 
 #include <fstream>
 
-ofstream record_start_angle("/home/ros/catkin_ws/src/user/src/date/simulator/record_start_angle_txt");
-ofstream record_end_angle("/home/ros/catkin_ws/src/user/src/date/record_end_angle_txt");
-ofstream record_robot_pose_yaw("/home/ros/catkin_ws/src/user/src/date/record_robot_pose_yaw_txt");
+std::ofstream record_start_angle("/home/ros/catkin_ws/src/user/src/date/simulator/record_start_angle_txt");
+std::ofstream record_end_angle("/home/ros/catkin_ws/src/user/src/date/simulator/record_end_angle_txt");
+std::ofstream record_robot_pose_yaw("/home/ros/catkin_ws/src/user/src/date/simulator/record_robot_pose_yaw_txt");
+std::ofstream record_angle("/home/ros/catkin_ws/src/user/src/date/simulator/record_angle_txt");
 
 std::vector<geometry_msgs::Pose> marker_positions;
 std::vector<int> marker_ids;;
@@ -60,8 +61,8 @@ std::vector<int> within_range_detection(){
     for(size_t i = 0; i < marker_positions.size(); ++i)
     {
         const auto& marker_pose = marker_positions[i];
-        double dx = robot_pose_x - marker_pose.position.x;
-        double dy = robot_pose_y - marker_pose.position.y;
+        double dx = marker_pose.position.x - robot_pose_x;
+        double dy = marker_pose.position.y - robot_pose_y;
         double distance = std::sqrt(dx * dx + dy * dy);
         
         if(distance > radius){
@@ -72,6 +73,8 @@ std::vector<int> within_range_detection(){
         if (angle < 0){
             angle += 2 * M_PI;
         }
+        
+        record_angle << angle  << std :: endl;
 
         double start_angle = robot_pose_yaw - angle_area / 2;
         double end_angle = robot_pose_yaw + angle_area / 2;
@@ -109,7 +112,7 @@ int main(int argc, char** argv)
     while(ros::ok())
     {
         // ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", robot_pose_x, robot_pose_y, robot_pose_z);
-        // ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
+        ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
         std::vector<int> in_range_ids = within_range_detection();
 
         if (! in_range_ids.empty()){
