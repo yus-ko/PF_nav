@@ -20,10 +20,12 @@ std::ofstream record_end_angle("/home/ros/catkin_ws/src/user/src/date/simulator/
 std::ofstream record_robot_pose_yaw("/home/ros/catkin_ws/src/user/src/date/simulator/record_robot_pose_yaw_txt");
 std::ofstream record_angle("/home/ros/catkin_ws/src/user/src/date/simulator/record_angle_txt");
 
+std::vector<geometry_msgs::Pose> particle_positions;
 std::vector<geometry_msgs::Pose> marker_positions;
 std::vector<int> marker_ids;;
 
 double robot_pose_x = 0.0, robot_pose_y = 0.0, robot_pose_z = 0.0, robot_pose_yaw = 0.0;
+double particle_pose_x = 0.0, particle_pose_y = 0.0, particle_pose_z = 0.0, robot_pase_yaw = 0.0;
 double radius = 3.0, start_angle = 0.0, end_angle = 0.0, angle_area = 85.2 * M_PI / 180;
 
 
@@ -53,6 +55,23 @@ void RobotPose_Callback(const nav_msgs::Odometry& odom_pose)
 
      robot_pose_yaw = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation);
     
+
+}
+
+void Particle_Callback(const geometry_msgs::PoseArray& particle_pose)
+{
+     particle_positions.clear();
+
+     for(const auto& particle : particle_pose.particle)
+    {
+        geometry_msgs::Pose particle_pose = particle.pose;
+
+        particle_positions.push_back(particle_pose);
+
+        ROS_INFO(" Position: [x: %f, y: %f, z: %f]", 
+                   particle_pose.position.x, particle_pose.position.y, particle_pose.position.z);
+    }
+
 
 }
 
@@ -108,11 +127,12 @@ int main(int argc, char** argv)
     // サブスクライバの作成
     ros::Subscriber sub_marker = nh.subscribe("marker", 1000, Marker_callback);
     ros::Subscriber sub_robot_pose = nh.subscribe("odom", 1000, RobotPose_Callback);
+    ros::Subscriber sub_particle_pose = nh.subscribe("particle_state", 1000, Particle_Callback);
 
     while(ros::ok())
     {
         // ROS_INFO("Position: x=%.2f, y=%.2f, z=%.2f", robot_pose_x, robot_pose_y, robot_pose_z);
-        ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
+        //ROS_INFO("Orientation (RPY): yaw=%.2f", robot_pose_yaw);
         std::vector<int> in_range_ids = within_range_detection();
 
         if (! in_range_ids.empty()){
