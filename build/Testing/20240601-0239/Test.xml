@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="(empty)"
+	BuildStamp="20240601-0239-Experimental"
+	Name="ros-dynabook-PZ-HUB"
+	Generator="ctest-3.10.2"
+	CompilerName="/usr/bin/c++"
+	CompilerVersion="7.5.0"
+	OSName="Linux"
+	Hostname="ros-dynabook-PZ-HUB"
+	OSRelease="5.4.0-150-generic"
+	OSVersion="#167~18.04.1-Ubuntu SMP Wed May 24 00:51:42 UTC 2023"
+	OSPlatform="x86_64"
+	Is64Bits="1"
+	VendorString="GenuineIntel"
+	VendorID="Intel Corporation"
+	FamilyID="6"
+	ModelID="140"
+	ProcessorCacheSize="12288"
+	NumberOfLogicalCPU="8"
+	NumberOfPhysicalCPU="4"
+	TotalVirtualMemory="2047"
+	TotalPhysicalMemory="15780"
+	LogicalProcessorsPerPhysical="2"
+	ProcessorClockFrequency="2245.1"
+	>
+	<Testing>
+		<StartDateTime>Jun 01 11:39 JST</StartDateTime>
+		<StartTestTime>1717209543</StartTestTime>
+		<TestList/>
+		<EndDateTime>Jun 01 11:39 JST</EndDateTime>
+		<EndTestTime>1717209543</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>
