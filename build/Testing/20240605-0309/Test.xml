@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Site BuildName="(empty)"
-	BuildStamp="20240603-0023-Experimental"
+	BuildStamp="20240605-0309-Experimental"
 	Name="ros-dynabook-PZ-HUB"
 	Generator="ctest-3.10.2"
 	CompilerName="/usr/bin/c++"
@@ -21,14 +21,14 @@
 	TotalVirtualMemory="2047"
 	TotalPhysicalMemory="15780"
 	LogicalProcessorsPerPhysical="2"
-	ProcessorClockFrequency="4133.63"
+	ProcessorClockFrequency="2410.67"
 	>
 	<Testing>
-		<StartDateTime>Jun 03 13:31 JST</StartDateTime>
-		<StartTestTime>1717389100</StartTestTime>
+		<StartDateTime>Jun 05 12:09 JST</StartDateTime>
+		<StartTestTime>1717556986</StartTestTime>
 		<TestList/>
-		<EndDateTime>Jun 03 13:31 JST</EndDateTime>
-		<EndTestTime>1717389100</EndTestTime>
+		<EndDateTime>Jun 05 12:09 JST</EndDateTime>
+		<EndTestTime>1717556986</EndTestTime>
 		<ElapsedMinutes>0</ElapsedMinutes>
 	</Testing>
 </Site>
