@@ -1,8 +1,0 @@
-prefix=/home/ros/catkin_ws/src/PF_nav/build/devel
-
-Name: PF_nav
-Description: Description of PF_nav
-Version: 0.0.0
-Cflags: -I/home/ros/catkin_ws/src/PF_nav/build/devel/include
-Libs: -L${prefix}/lib -lpotbot_lib
-Requires: 

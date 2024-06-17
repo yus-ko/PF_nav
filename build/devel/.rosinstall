@@ -1,2 +1,0 @@
-- setup-file:
-    local-name: /home/ros/catkin_ws/src/PF_nav/build/devel/setup.sh
