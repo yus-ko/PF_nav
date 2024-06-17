@@ -1,4 +1,6 @@
 <launch>
+   <arg name="particle_num"                                    default="1000"/>
+
    <group ns="PF_nav">
       <node pkg="PF_nav" name="PF_nav" type="PF_nav" output="screen">
 
@@ -6,7 +8,7 @@
          <param name="control_frequency"                       value="50.0"/>
 
          <!-- 生成するパーティクル数 -->
-         <param name="particle_num"                            value="1000"/>
+         <param name="particle_num"                            value="$(arg particle_num)"/>
 
          <!-- パーティクル移動時のノイズパラメータ -->
          <param name="norm_noise_mean_linear_velocity"         value="0.0"/>
@@ -28,7 +30,9 @@
          <rosparam command="load" file="$(find PF_nav)/yaml/markers.yaml"/>
       </node>
      
-     <node pkg="PF_nav" name="PF_nav_Visualization" type="PF_nav_Visualization" output="screen"/>
+     <node pkg="PF_nav" name="PF_nav_Visualization" type="PF_nav_Visualization" output="screen">
+         <!-- <param name="particle_num"                            value="$(arg particle_num)"/> -->
+     </node>
 
       <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find PF_nav)/rviz/PF_nav.rviz"/>
 
