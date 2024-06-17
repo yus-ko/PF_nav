@@ -30,7 +30,7 @@
      
      <node pkg="PF_nav" name="PF_nav_Visualization" type="PF_nav_Visualization" output="screen"/>
 
-      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find controller_tutorial)/rviz/controller_tutorial.rviz"/>
+      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find PF_nav)/rviz/PF_nav.rviz"/>
 
    </group>
 </launch>
