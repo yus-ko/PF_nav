@@ -1,0 +1,5 @@
+<launch>
+   <node pkg="strcut_slam" name="FLD_marker2_2_6" type="FLD_marker2_2_6" output="screen">
+      <remap from="/robot1/mobile_base/commands/velocity" to="invalid_cmd"/>
+   </node>
+</launch>
