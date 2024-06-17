@@ -189,9 +189,9 @@ void Visualization_mode(const std::vector<int>& in_range_ids)
                 distance.push_back(particle_distance);
                 angle.push_back(particle_angle);
                 
-                double w_dis = 1/(sqrt(2*M_PI*dis_var))*exp(-((abs(Robot_distance)-abs(particle_distance))*(abs(Robot_distance)-abs(particle_distance)))/(2*dis_var))+1e-100; 
+                double w_dis = 1/(sqrt(2*M_PI*dis_var))*exp(-((abs(Robot_distance)-abs(particle_distance))*(abs(Robot_distance)-abs(particle_distance)))/(2*dis_var)); 
 
-                double w_ang =1/(sqrt(2*M_PI * ang_var))*exp(-(( Robot_angle - (- particle_angle - particle.yaw)) * ( Robot_angle - (- particle_angle - particle.yaw))) / (2 * ang_var))+1e-100;
+                double w_ang =1/(sqrt(2*M_PI * ang_var))*exp(-(( Robot_angle - (- particle_angle - particle.yaw)) * ( Robot_angle - (- particle_angle - particle.yaw))) / (2 * ang_var));
                 
                 if(Robot_angle * particle_angle > 0 && particle_angle > 1.57)
                 {
@@ -202,8 +202,8 @@ void Visualization_mode(const std::vector<int>& in_range_ids)
                 }
                 
 
-                double w_dis_log = log(w_dis);
-                double w_ang_log = log(w_ang);
+                double w_dis_log = log10(w_dis);
+                double w_ang_log = log10(w_ang);
 
                 double weight = w_dis_log + w_ang_log;
                 

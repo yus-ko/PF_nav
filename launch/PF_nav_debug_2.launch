@@ -1,0 +1,11 @@
+<launch>
+   <group ns="PF_nav">
+
+      <node pkg="PF_nav" name="PF_nav_MarkerArray" type="PF_nav_MarkerArray" output="screen">
+         <rosparam command="load" file="$(find PF_nav)/yaml/markers.yaml"/>
+      </node>
+
+      <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find controller_tutorial)/rviz/controller_tutorial.rviz"/>
+
+   </group>
+</launch>
