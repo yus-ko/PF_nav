@@ -4,12 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Robot1
-        - /Robot1/Shape1
-        - /MarkerArray1
-        - /Odometry1
-        - /Odometry1/Shape1
-      Splitter Ratio: 0.4794117510318756
+        - /Robot noise1/Shape1
+        - /Robot estimate1/Shape1
+      Splitter Ratio: 0.4852941036224365
     Tree Height: 670
   - Class: rviz/Selection
     Name: Selection
@@ -81,7 +78,7 @@ Visualization Manager:
         Value: true
       Enabled: true
       Keep: 1
-      Name: Robot
+      Name: Robot noise
       Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
@@ -137,8 +134,8 @@ Visualization Manager:
       Value: false
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /PF_nav/marker
-      Name: MarkerArray
+      Marker Topic: marker
+      Name: LandMark
       Namespaces:
         basic_shapes: true
       Queue Size: 100
@@ -162,7 +159,7 @@ Visualization Manager:
         Value: true
       Enabled: true
       Keep: 1
-      Name: Odometry
+      Name: Robot estimate
       Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
@@ -174,7 +171,41 @@ Visualization Manager:
         Shaft Length: 1
         Shaft Radius: 0.05000000074505806
         Value: Axes
-      Topic: /PF_nav/odom/estimated
+      Topic: odom/estimated
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 1
+      Name: Robot truth
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 46; 52; 54
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: odom/truth
       Unreliable: false
       Value: true
   Enabled: true
@@ -214,11 +245,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 41.26643371582031
+      Scale: 51.76461410522461
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 7.992173671722412
-      Y: 4.41115140914917
+      X: 4.049692630767822
+      Y: 2.2482078075408936
     Saved: ~
 Window Geometry:
   Displays:

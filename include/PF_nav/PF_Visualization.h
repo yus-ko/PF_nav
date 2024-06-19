@@ -18,13 +18,6 @@
 #include <algorithm> 
 #include <fstream>
 
-//構造体の定義(本来はincludeを作成してやるべき)
-struct ParticlePosition {
-    double x;
-    double y;
-    double yaw;
-};
-
 class PFVisualization
 {
 private:
@@ -43,7 +36,6 @@ private:
     // std::ofstream particle_weight;//各パーティクルの尤度(距離、角度、尤度、合計)
     // std::ofstream particle_Norm_weight;//各パーティクルの正規化後の尤度(正規化前尤度、正規化前合計尤度、正規化前尤度、正規化前合計尤度(1になる))
 
-    std::vector<ParticlePosition> particle_positions_; //パーティクル位置定義(動作モデル後)
     std::vector<geometry_msgs::Pose> marker_positions_; //マーカー位置定義
     std::vector<int> marker_ids_;; //マーカーid
     std::vector<double> Likelihood_; //各マーカの重み
@@ -69,7 +61,6 @@ public:
 
     void markerCallback(const visualization_msgs::MarkerArray& marker_array);
     void robotPoseCallback(const nav_msgs::Odometry& odom_pose);
-    void particleCallback(const geometry_msgs::PoseArray& particle_pose);
     void updateParticles();
 
     void initLiklihood();

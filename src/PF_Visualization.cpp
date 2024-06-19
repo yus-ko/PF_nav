@@ -2,18 +2,9 @@
 
 PFVisualization::PFVisualization(/* args */)
 {
+    
     ros::NodeHandle n("~");
-	// n.getParam("particle_num", control_frequency); //launchファイルから取得周期(50.0)
 
-    // record_end_angle_ = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/record_end_angle__txt");
-    // record_robot_pose_yaw = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/record_robot_pose_yaw_txt");
-    // record_angle = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/record_angle_txt");
-    // particle_position = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/particle_position_txt");
-    // marker_particle_information = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/ marker_particle_information_txt");
-    // particle_weight = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/ particle_weight_txt");
-    // particle_Norm_weight = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/ particle_Norm_weight_txt");
-
-    ros::NodeHandle nh;
     int particle_num = 100;
 	double norm_noise_mean_linear_velocity = 0;
 	double norm_noise_variance_linear_velocity = 0.1;
@@ -25,9 +16,10 @@ PFVisualization::PFVisualization(/* args */)
 	n.getParam("norm_noise_variance_linear_velocity", norm_noise_variance_linear_velocity);
 	n.getParam("norm_noise_mean_angular_velocity", norm_noise_mean_angular_velocity);
 	n.getParam("norm_noise_variance_angular_velocity", norm_noise_variance_angular_velocity);
-
+    
+    ros::NodeHandle nh;
 	pub_particles_ = nh.advertise<geometry_msgs::PoseArray>("particles", 1);
-	pub_particles_state_ = nh.advertise<potbot_msgs::ObstacleArray>("particles_state", 1);
+	// pub_particles_state_ = nh.advertise<potbot_msgs::ObstacleArray>("particles_state", 1);
 
 	// ros::Subscriber sub_inipose				= nh.subscribe("initialpose",1,inipose_callback);
 
@@ -36,33 +28,22 @@ PFVisualization::PFVisualization(/* args */)
     // サブスクライバの作成
     sub_marker_ = nh.subscribe("marker", 1000, &PFVisualization::markerCallback,this);
     sub_robot_pose_ = nh.subscribe("odom", 1000, &PFVisualization::robotPoseCallback,this);
-    // sub_particle_pose_ = nh.subscribe("particles", 1000, &PFVisualization::particleCallback,this);
 
-    
-    // geometry_msgs::PoseArray particles_msg;
-	// // particles_msg.header.frame_id = robot_pose.header.frame_id;
-	// potbot_msgs::ObstacleArray particle_state_msg;
-	// particle_state_msg.header.frame_id = robot_pose.header.frame_id;
-	// for (size_t i = 0; i < particle_num; i++) 
-	// {
-	// 	particles_msg.poses.push_back(robot_pose.pose.pose);
-	// 	potbot_msgs::Obstacle p;
-	// 	p.pose = robot_pose.pose.pose;
-	// 	particle_state_msg.data.push_back(p);
-	// };
-
-	// for (auto& robo : g_robot)
-	// {
-	// 	// robo.deltatime = 1.0/control_frequency;
-	// 	robo.set_msg(robot_pose);
-	// }
-
-    particles_.resize(particle_num);
 
 	std::random_device rd;
     std::default_random_engine generator(rd());
     std::normal_distribution<double> distribution_linear_velocity(norm_noise_mean_linear_velocity, sqrt(norm_noise_variance_linear_velocity));
 	std::normal_distribution<double> distribution_angular_velocity(norm_noise_mean_angular_velocity, sqrt(norm_noise_variance_angular_velocity));
+
+    particles_.resize(particle_num);
+    for (auto& p : particles_)
+	{
+		// robo.deltatime = 1.0/control_frequency;
+        nav_msgs::Odometry p_msg;
+        p.x = distribution_linear_velocity(generator);
+        p.y = distribution_linear_velocity(generator);
+        p.yaw = distribution_angular_velocity(generator);
+	}
 }
 
 void PFVisualization::markerCallback(const visualization_msgs::MarkerArray& marker_array)
@@ -95,38 +76,17 @@ void PFVisualization::robotPoseCallback(const nav_msgs::Odometry& odom_pose)
 
     robot_pose_yaw_ = potbot_lib::utility::get_Yaw(odom_pose.pose.pose.orientation);
     
-    if (sebscribed_landmark_pose_ && sebscribed_robot_pose_ && sebscribed_particle_pose_)
+    if (sebscribed_landmark_pose_ && sebscribed_robot_pose_)
     {
         localization();
     }    
     
 }
 
-//パーティクルのコールバック関数
-void PFVisualization::particleCallback(const geometry_msgs::PoseArray& particle_pose)
-{
-    sebscribed_particle_pose_ = true;
-
-    particle_positions_.clear();
-    //particle_position.clear()
-    for(const auto& particle_pose : particle_pose.poses)
-    {
-        ParticlePosition particle_position;
-        particle_position.x = particle_pose.position.x;
-        particle_position.y = particle_pose.position.y;
-        particle_position.yaw = potbot_lib::utility::get_Yaw(particle_pose.orientation);
-        // ROS_INFO(" Position: [x: %f, y: %f, z: %f]", 
-        //            particle_pose.position.x, particle_pose.position.y, particle_pose.position.z);
-        
-        particle_positions_.push_back(particle_position);
-
-        //particle_position << "particle_position.x" << particle_pose.position.x << "particle_position.y" << particle_pose.position.y << "particle_position.yaw" << particle_position_yaw << std::endl;
-    }
-  
-}
-
 void PFVisualization::localization()
 {
+
+    updateParticles();
 
     std::vector<int> in_range_ids;
     getObservedLandmark(in_range_ids);
@@ -140,35 +100,35 @@ void PFVisualization::localization()
 
     getEstimatedRobotPose();
 
-
 }
 
 void PFVisualization::updateParticles()
 {
-    // for (size_t i = 1; i < particle_num+1; i++)
-    // {
-    //     double v_noise = v_truth + distribution_linear_velocity(generator);
-    //     double omega_noise = omega_truth + distribution_angular_velocity(generator);
-    //     nav_msgs::Odometry particle;
-    //     g_robot[i].to_msg(particle);
-    //     particle.twist.twist.linear.x = v_noise;
-    //     particle.twist.twist.angular.z = omega_noise;
-    //     g_robot[i].set_msg(particle);
-    //     g_robot[i].update();
-    //     particles_msg.poses[i-1] = particle.pose.pose;
+    geometry_msgs::PoseArray particles_msg;
+    for (auto& p:particles_)
+    {
+        double v = odom_msg_.twist.twist.linear.x;
+        double omega = odom_msg_.twist.twist.angular.z;
+        p.v = v;
+        p.omega = omega;
+        p.deltatime = 1.0/50.0;
+        p.update();
 
-    //     particle_state_msg.data[i-1].pose = particle.pose.pose;
-    //     particle_state_msg.data[i-1].twist = particle.twist.twist;
-
-    // }
+        nav_msgs::Odometry p_msg;
+        p.to_msg(p_msg);
+        particles_msg.poses.push_back(p_msg.pose.pose);
+    }
     
-    // pub_particles_.publish();
+    particles_msg.header.frame_id = "map";
+    particles_msg.header.stamp = ros::Time::now();
+
+    pub_particles_.publish(particles_msg);
 }
 
 void PFVisualization::initLiklihood()
 {
     Likelihood_.clear();
-    Likelihood_.resize(particle_positions_.size());
+    Likelihood_.resize(particles_.size());
     std::fill(Likelihood_.begin(), Likelihood_.end(), 1.0);
 }
 
@@ -226,9 +186,9 @@ void PFVisualization::getLikelihood(size_t marker_id)
 {
     const auto& marker = marker_positions_[marker_id];
 
-    for (size_t j = 0; j < particle_positions_.size(); ++j)
+    for (size_t j = 0; j < particles_.size(); ++j)
     {
-        const auto & particle = particle_positions_[j]; 
+        const auto & particle = particles_[j]; 
 
         dis_X_ = marker.position.x - particle.x;
         dis_Y_ = marker.position.y - particle.y;
@@ -275,7 +235,7 @@ void PFVisualization::getLikelihood(size_t marker_id)
     }
 
     ROS_INFO_STREAM("Likelihood_ size: " << Likelihood_.size());
-    ROS_INFO_STREAM("particle size: " <<  particle_positions_.size());
+    ROS_INFO_STREAM("particle size: " <<  particles_.size());
 }   
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -289,9 +249,9 @@ void PFVisualization::getEstimatedRobotPose()
 
     ROS_INFO("Starting Localization_mode");
     
-    for (size_t j = 0; j < particle_positions_.size(); ++j)
+    for (size_t j = 0; j < particles_.size(); ++j)
     {
-        const auto & particle = particle_positions_[j];
+        const auto & particle = particles_[j];
         const auto & w = Likelihood_[j];
             
         // std::cout << " 正規化前尤度 " << w << std :: endl;
@@ -328,7 +288,7 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
 {
     step_sum_weight_.clear();
 
-    for ( size_t i = 0; i < particle_positions_.size(); ++i)
+    for ( size_t i = 0; i < particles_.size(); ++i)
     {
        double step_weight = 0.0;
        step_weight += Likelihood_[i];
@@ -337,7 +297,7 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
 
     std::random_device rd;
     std::default_random_engine eng(rd());
-    std::uniform_real_distribution<double> distr(0,step_sum_weight_[ particle_positions_.size() - 1]);
+    std::uniform_real_distribution<double> distr(0,step_sum_weight_[ particles_.size() - 1]);
     double darts = distr(eng);
 
     int resam_num = 0;
@@ -361,7 +321,7 @@ int main(int argc, char** argv)
     //     ros::spinOnce();
     // }
     
-    // ros::spin();
+    ros::spin();
 
     return 0;
 }
