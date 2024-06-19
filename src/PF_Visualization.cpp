@@ -1,81 +1,8 @@
-#include <ros/ros.h>
-#include <potbot_lib/DiffDriveController.h>
-#include <potbot_msgs/ObstacleArray.h>
-#include <dynamic_reconfigure/server.h>
-#include <geometry_msgs/Pose.h>
-#include <PF_nav/PF_navConfig.h>
-#include <geometry_msgs/PoseArray.h>
-#include <random>
-#include <visualization_msgs/MarkerArray.h>
-#include <potbot_lib/Utility.h>
-#include <cmath>
-#include <vector>
-#include <math.h>
-#include <nav_msgs/Odometry.h>
-#include <algorithm> 
-#include <fstream>
-
-//構造体の定義(本来はincludeを作成してやるべき)
-struct ParticlePosition {
-    double x;
-    double y;
-    double yaw;
-};
-
-class PFVisualization
-{
-private:
-    ros::Subscriber sub_marker_, sub_robot_pose_, sub_particle_pose_;
-    ros::Publisher pub_estimated_robot_;
-
-    nav_msgs::Odometry odom_msg_;
-
-    //各記録用(ofstream定義)
-    // std::ofstream record_end_angle_; //観測用カメラの測定最終角度
-    // std::ofstream record_robot_pose_yaw; //ロボットの姿勢角度(観測では上記の2つの真ん中になっていれば良い)
-    // std::ofstream record_angle; //ロボットとマーカーの角度(atan関数が機能しているかの確認)
-    // std::ofstream particle_position; //各パーティクルの位置(動作モデル後)
-    // std::ofstream marker_particle_information; //パーティクルとマーカー間の距離と角度(観測モデル使用情報)
-    // std::ofstream particle_weight;//各パーティクルの尤度(距離、角度、尤度、合計)
-    // std::ofstream particle_Norm_weight;//各パーティクルの正規化後の尤度(正規化前尤度、正規化前合計尤度、正規化前尤度、正規化前合計尤度(1になる))
-
-    std::vector<ParticlePosition> particle_positions_; //パーティクル位置定義(動作モデル後)
-    std::vector<geometry_msgs::Pose> marker_positions_; //マーカー位置定義
-    std::vector<int> marker_ids_;; //マーカーid
-    std::vector<double> Likelihood_; //各マーカの重み
-    std::vector<double> Norm_Likelihood_;
-    //std::vector<double> particle_position_x; //各パーティクルのx座標
-    //std::vector<double> particle_position_y; //各パーティクルのx座標
-    //std::vector<double> particle_position_yaw; //各パーティクルのx座標
-
-    double robot_pose_x_ = 0.0, robot_pose_y_ = 0.0, robot_pose_z_ = 0.0, robot_pose_yaw_ = 0.0; //ロボット位置の真値(定義)
-    double Robot_distance_ = 0.0, Robot_angle_ = 0.0; //ロボットとマーカーの距離と角度(角度に関してはロボット座標系における角度に変更する必要あるかも)
-    double particle_position_x_ = 0.0, particle_position_y_ = 0.0, Particle_Est_RobotYaw_ = 0.0; //パーティクルの位置(使ってない)
-    double dis_X_ = 0.0, dis_Y_ = 0.0; //各パーティクルの各マーカー間のX軸、Y軸誤差
-    double radius_ = 3.0, start_angle_ = 0.0, end_angle_ = 0.0, angle_area_ = 85.2 * M_PI / 180; //ロボットの観測範囲の定義
-    double dis_var_ = 0.000856, ang_var_ = 0.000464;
-    double total_weight_ = 0.0;
-    bool sebscribed_robot_pose_ = false;
-    bool sebscribed_landmark_pose_ = false;
-    bool sebscribed_particle_pose_ = false;
-public:
-    PFVisualization(/* args */);
-    ~PFVisualization(){};
-
-    void markerCallback(const visualization_msgs::MarkerArray& marker_array);
-    void robotPoseCallback(const nav_msgs::Odometry& odom_pose);
-    void particleCallback(const geometry_msgs::PoseArray& particle_pose);
-    void initLiklihood();
-    void normLiklihood();
-    void getObservedLandmark(std::vector<int>& in_range);
-    void getLikelihood(size_t marker_id);
-    void getEstimatedRobotPose();
-    void localization();
-};
+#include <PF_nav/PF_Visualization.h>
 
 PFVisualization::PFVisualization(/* args */)
 {
-    // ros::NodeHandle n("~");
+    ros::NodeHandle n("~");
 	// n.getParam("particle_num", control_frequency); //launchファイルから取得周期(50.0)
 
     // record_end_angle_ = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/record_end_angle__txt");
@@ -87,14 +14,55 @@ PFVisualization::PFVisualization(/* args */)
     // particle_Norm_weight = std::ofstream("/home/ros/catkin_ws/src/user/src/date/simulator/ particle_Norm_weight_txt");
 
     ros::NodeHandle nh;
-    ros::Rate rate(50.0);
+    int particle_num = 100;
+	double norm_noise_mean_linear_velocity = 0;
+	double norm_noise_variance_linear_velocity = 0.1;
+	double norm_noise_mean_angular_velocity = 0;
+	double norm_noise_variance_angular_velocity = 0.1;
+	
+	n.getParam("particle_num", particle_num);
+	n.getParam("norm_noise_mean_linear_velocity", norm_noise_mean_linear_velocity);
+	n.getParam("norm_noise_variance_linear_velocity", norm_noise_variance_linear_velocity);
+	n.getParam("norm_noise_mean_angular_velocity", norm_noise_mean_angular_velocity);
+	n.getParam("norm_noise_variance_angular_velocity", norm_noise_variance_angular_velocity);
+
+	pub_particles_ = nh.advertise<geometry_msgs::PoseArray>("particles", 1);
+	pub_particles_state_ = nh.advertise<potbot_msgs::ObstacleArray>("particles_state", 1);
+
+	// ros::Subscriber sub_inipose				= nh.subscribe("initialpose",1,inipose_callback);
+
+    pub_estimated_robot_ = nh.advertise<nav_msgs::Odometry>("odom/estimated", 1);
 
     // サブスクライバの作成
     sub_marker_ = nh.subscribe("marker", 1000, &PFVisualization::markerCallback,this);
     sub_robot_pose_ = nh.subscribe("odom", 1000, &PFVisualization::robotPoseCallback,this);
-    sub_particle_pose_ = nh.subscribe("particles", 1000, &PFVisualization::particleCallback,this);
+    // sub_particle_pose_ = nh.subscribe("particles", 1000, &PFVisualization::particleCallback,this);
 
-    pub_estimated_robot_ = nh.advertise<nav_msgs::Odometry>("odom/estimated", 1);
+    
+    // geometry_msgs::PoseArray particles_msg;
+	// // particles_msg.header.frame_id = robot_pose.header.frame_id;
+	// potbot_msgs::ObstacleArray particle_state_msg;
+	// particle_state_msg.header.frame_id = robot_pose.header.frame_id;
+	// for (size_t i = 0; i < particle_num; i++) 
+	// {
+	// 	particles_msg.poses.push_back(robot_pose.pose.pose);
+	// 	potbot_msgs::Obstacle p;
+	// 	p.pose = robot_pose.pose.pose;
+	// 	particle_state_msg.data.push_back(p);
+	// };
+
+	// for (auto& robo : g_robot)
+	// {
+	// 	// robo.deltatime = 1.0/control_frequency;
+	// 	robo.set_msg(robot_pose);
+	// }
+
+    particles_.resize(particle_num);
+
+	std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::normal_distribution<double> distribution_linear_velocity(norm_noise_mean_linear_velocity, sqrt(norm_noise_variance_linear_velocity));
+	std::normal_distribution<double> distribution_angular_velocity(norm_noise_mean_angular_velocity, sqrt(norm_noise_variance_angular_velocity));
 }
 
 void PFVisualization::markerCallback(const visualization_msgs::MarkerArray& marker_array)
@@ -159,6 +127,7 @@ void PFVisualization::particleCallback(const geometry_msgs::PoseArray& particle_
 
 void PFVisualization::localization()
 {
+
     std::vector<int> in_range_ids;
     getObservedLandmark(in_range_ids);
     initLiklihood();
@@ -170,6 +139,30 @@ void PFVisualization::localization()
     normLiklihood();
 
     getEstimatedRobotPose();
+
+
+}
+
+void PFVisualization::updateParticles()
+{
+    // for (size_t i = 1; i < particle_num+1; i++)
+    // {
+    //     double v_noise = v_truth + distribution_linear_velocity(generator);
+    //     double omega_noise = omega_truth + distribution_angular_velocity(generator);
+    //     nav_msgs::Odometry particle;
+    //     g_robot[i].to_msg(particle);
+    //     particle.twist.twist.linear.x = v_noise;
+    //     particle.twist.twist.angular.z = omega_noise;
+    //     g_robot[i].set_msg(particle);
+    //     g_robot[i].update();
+    //     particles_msg.poses[i-1] = particle.pose.pose;
+
+    //     particle_state_msg.data[i-1].pose = particle.pose.pose;
+    //     particle_state_msg.data[i-1].twist = particle.twist.twist;
+
+    // }
+    
+    // pub_particles_.publish();
 }
 
 void PFVisualization::initLiklihood()
@@ -330,11 +323,45 @@ void PFVisualization::getEstimatedRobotPose()
     pub_estimated_robot_.publish(est_msg);
 }
 
+//リサンプリング(鈴木ver)
+void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weight_)
+{
+    step_sum_weight_.clear();
+
+    for ( size_t i = 0; i < particle_positions_.size(); ++i)
+    {
+       double step_weight = 0.0;
+       step_weight += Likelihood_[i];
+       step_sum_weight_.push_back(step_weight);
+    }
+
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_real_distribution<double> distr(0,step_sum_weight_[ particle_positions_.size() - 1]);
+    double darts = distr(eng);
+
+    int resam_num = 0;
+
+}
+
+//リサンプリング(赤井先生ver)
+// void PFVisualization::getResamplingRobotPose2(std::vector<double>& step_sum_weight_)
+// {
+//     step_sum_weight_.clear();
+// }
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "marker_Visualization");
     PFVisualization pfv;
-    ros::spin();
+
+    // while (ros::ok())
+    // {
+    //     pfv.resampling();
+    //     ros::spinOnce();
+    // }
+    
+    // ros::spin();
 
     return 0;
 }
