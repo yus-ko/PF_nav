@@ -100,6 +100,8 @@ void PFVisualization::localization()
 
     getEstimatedRobotPose();
 
+    getResamplingRobotPose1(step_sum_weight_);
+
 }
 
 void PFVisualization::updateParticles()
@@ -283,27 +285,112 @@ void PFVisualization::getEstimatedRobotPose()
     pub_estimated_robot_.publish(est_msg);
 }
 
+//最大尤度を用いたリサンプリング方式
+void PFVisualization::getResamplingRobotPose0()
+{
+    ros::NodeHandle n("~");
+    
+    double norm_noise_mean_linear_velocity = 0;
+	double norm_noise_variance_linear_velocity = 0.1;
+	double norm_noise_mean_angular_velocity = 0;
+	double norm_noise_variance_angular_velocity = 0.1;
+
+    n.getParam("norm_noise_mean_linear_velocity", norm_noise_mean_linear_velocity);
+	n.getParam("norm_noise_variance_linear_velocity", norm_noise_variance_linear_velocity);
+	n.getParam("norm_noise_mean_angular_velocity", norm_noise_mean_angular_velocity);
+	n.getParam("norm_noise_variance_angular_velocity", norm_noise_variance_angular_velocity);   
+
+    std::vector<potbot_lib::Controller::DiffDriveController> particles_tmp = particles_;
+    int Max_Likelihood_idx = 0;
+
+    double step_weight = Likelihood_[0];
+
+    particles_[0].x = particles_tmp[0].x;
+    particles_[0].y = particles_tmp[0].y;
+    particles_[0].yaw = particles_tmp[0].yaw;
+   
+    for (size_t i = 1; i < particles_.size(); ++i)
+	{
+		if(step_weight < Likelihood_[i])
+        {
+            Max_Likelihood_idx = i;
+        
+            particles_[0].x = particles_tmp[i].x;
+            particles_[0].y = particles_tmp[i].y;
+            particles_[0].yaw = particles_tmp[i].yaw;
+        }
+	}
+    
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::normal_distribution<double> distribution_linear_velocity(norm_noise_mean_linear_velocity, sqrt(norm_noise_variance_linear_velocity));
+	std::normal_distribution<double> distribution_angular_velocity(norm_noise_mean_angular_velocity, sqrt(norm_noise_variance_angular_velocity));
+
+
+    for (size_t j = 1; j < particles_.size(); ++j)
+	{
+        
+        particles_[j].x = particles_[0].x + distribution_linear_velocity(generator);
+        particles_[j].y = particles_[0].x + distribution_linear_velocity(generator);
+        particles_[j].yaw = particles_[0].x + distribution_angular_velocity(generator);
+	}
+
+}
+
 //リサンプリング(鈴木ver)
 void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weight_)
 {
     step_sum_weight_.clear();
+    double step_weight = 0.0;
 
     for ( size_t i = 0; i < particles_.size(); ++i)
     {
-       double step_weight = 0.0;
        step_weight += Likelihood_[i];
        step_sum_weight_.push_back(step_weight);
     }
 
     std::random_device rd;
     std::default_random_engine eng(rd());
-    std::uniform_real_distribution<double> distr(0,step_sum_weight_[ particles_.size() - 1]);
+    std::uniform_real_distribution<double> distr(0,step_sum_weight_[ particles_.size() - 1] / particles_.size());
     double darts = distr(eng);
+    darts = 0;
 
-    int resam_num = 0;
+    int weight_num = 0;
+    int step_num = 0;
 
+    std::vector<potbot_lib::Controller::DiffDriveController> particles_tmp = particles_;
+    
+    for (size_t i = 0; i < step_sum_weight_.size(); ++i) 
+    {
+        ROS_INFO_STREAM("step_sum_weight_[" << i << "]: " << step_sum_weight_[i] << " x: "  << particles_[i].x << darts << " y: "  << particles_[i].y << "  yaw: "  << particles_[i].yaw);
+    }
+    
+    while(step_num <  particles_.size())
+    {
+        if(darts < step_sum_weight_[weight_num])
+        {
+            ROS_INFO_STREAM("step_number: " << step_num << " x: "  << particles_[step_num].x << darts << " y: "  << particles_[step_num].y << "  yaw: "  << particles_[step_num].yaw);
+
+            particles_[step_num].x = particles_tmp[weight_num].x;
+            particles_[step_num].y = particles_tmp[weight_num].y;
+            particles_[step_num].yaw = particles_tmp[weight_num].yaw;
+
+            ROS_INFO_STREAM("step_number: " << step_num << " x: "  << particles_[step_num].x << darts << " y: "  << particles_[step_num].y << "  yaw: "  << particles_[step_num].yaw);
+            // darts += (step_sum_weight_[ particles_.size() - 1] / particles_.size());
+            darts += 0.001;
+            step_num += 1;
+        }else
+        {
+            weight_num += 1;
+            // if (weight_num > particles_tmp.size())
+            // {
+            //     particles_[step_num] = particles_tmp.back();
+            //     step_num += 1;
+            // }
+            
+        }
+    }
 }
-
 //リサンプリング(赤井先生ver)
 // void PFVisualization::getResamplingRobotPose2(std::vector<double>& step_sum_weight_)
 // {

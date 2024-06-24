@@ -69,6 +69,7 @@ public:
     void getLikelihood(size_t marker_id);
     void getEstimatedRobotPose();
     void localization();
+     void getResamplingRobotPose0();
     void getResamplingRobotPose1(std::vector<double>& step_sum_weight_);
     void getResamplingRobotPose2(std::vector<double>& step_sum_weight_);
 };
