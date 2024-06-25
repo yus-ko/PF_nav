@@ -342,12 +342,18 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
 {
     step_sum_weight_.clear();
     double step_weight = 0.0;
+    double Effective_Sample_Size = 0.0;
+    double ESS = 0.0;
 
     for ( size_t i = 0; i < particles_.size(); ++i)
     {
        step_weight += Likelihood_[i];
+       ESS += Likelihood_[i] * Likelihood_[i];
        step_sum_weight_.push_back(step_weight);
     }
+    
+    Effective_Sample_Size = 1 / ESS;
+    ROS_INFO_STREAM("ESS" << Effective_Sample_Size );
 
     std::random_device rd;
     std::default_random_engine eng(rd());
@@ -364,32 +370,33 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
     {
         ROS_INFO_STREAM("step_sum_weight_[" << i << "]: " << step_sum_weight_[i] << " x: "  << particles_[i].x << darts << " y: "  << particles_[i].y << "  yaw: "  << particles_[i].yaw);
     }
-    
-    while(step_num <  particles_.size())
+     
+    if ( Effective_Sample_Size < particles_.size() / 2)
     {
-        if(darts < step_sum_weight_[weight_num])
+        ROS_INFO("Not Active Resampling");
+    }else
+    {
+        while(step_num <  particles_.size())
         {
-            ROS_INFO_STREAM("step_number: " << step_num << " x: "  << particles_[step_num].x << darts << " y: "  << particles_[step_num].y << "  yaw: "  << particles_[step_num].yaw);
+            if(darts < step_sum_weight_[weight_num])
+            {
+                ROS_INFO_STREAM("step_number: " << step_num << " x: "  << particles_[step_num].x << darts << " y: "  << particles_[step_num].y << "  yaw: "  << particles_[step_num].yaw);
 
-            particles_[step_num].x = particles_tmp[weight_num].x;
-            particles_[step_num].y = particles_tmp[weight_num].y;
-            particles_[step_num].yaw = particles_tmp[weight_num].yaw;
+                particles_[step_num].x = particles_tmp[weight_num].x;
+                particles_[step_num].y = particles_tmp[weight_num].y;
+                particles_[step_num].yaw = particles_tmp[weight_num].yaw;
 
-            ROS_INFO_STREAM("step_number: " << step_num << " x: "  << particles_[step_num].x << darts << " y: "  << particles_[step_num].y << "  yaw: "  << particles_[step_num].yaw);
-            // darts += (step_sum_weight_[ particles_.size() - 1] / particles_.size());
-            darts += 0.001;
-            step_num += 1;
-        }else
-        {
-            weight_num += 1;
-            // if (weight_num > particles_tmp.size())
-            // {
-            //     particles_[step_num] = particles_tmp.back();
-            //     step_num += 1;
-            // }
-            
+                ROS_INFO_STREAM("step_number: " << step_num << " x: "  << particles_[step_num].x << darts << " y: "  << particles_[step_num].y << "  yaw: "  << particles_[step_num].yaw);
+                // darts += (step_sum_weight_[ particles_.size() - 1] / particles_.size());
+                darts += 0.001;
+                step_num += 1;
+            }else
+            {
+                weight_num += 1;   
+            }
         }
     }
+    std::fill(Likelihood_.begin(), Likelihood_.end(), 1.0);
 }
 //リサンプリング(赤井先生ver)
 // void PFVisualization::getResamplingRobotPose2(std::vector<double>& step_sum_weight_)
