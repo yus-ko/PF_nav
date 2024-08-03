@@ -1,6 +1,7 @@
 #include <PF_nav/PF_Visualization.h>
 
 std::ofstream Likelihood_txt("/home/ros/catkin_ws/src/user/src/date/simulator/Likelihood.txt");
+std::ofstream Ess_txt("/home/ros/catkin_ws/src/user/src/date/simulator/Ess.txt");
 
 PFVisualization::PFVisualization(/* args */)
 {
@@ -346,15 +347,17 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
     double step_weight = 0.0;
     double Effective_Sample_Size = 0.0;
     double ESS_sum = 0.0;
-
+    
     for ( size_t i = 0; i < particles_.size(); ++i)
     {
        step_weight += Likelihood_[i];
-       ESS_sum += Likelihood_[i] * Likelihood_[i];;
+       ESS_sum += Likelihood_[i] * Likelihood_[i];
        step_sum_weight_.push_back(step_weight);
     }
     
     Effective_Sample_Size = 1 / ESS_sum;
+
+    Ess_txt << "Effective_Sample_Size_" <<  "  "  << Effective_Sample_Size << std::endl;
 
     std::random_device rd;
     std::default_random_engine eng(rd());
@@ -368,7 +371,7 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
     std::vector<potbot_lib::Controller::DiffDriveController> particles_tmp = particles_;
     
      
-    if ( Effective_Sample_Size < particles_.size() * 0.3)
+    if ( Effective_Sample_Size < particles_.size() * 0.5)
     {
         ROS_INFO("Not Active Resampling");
     }else
