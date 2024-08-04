@@ -50,8 +50,8 @@ private:
     double particle_position_x_ = 0.0, particle_position_y_ = 0.0, Particle_Est_RobotYaw_ = 0.0; //パーティクルの位置(使ってない)
     double dis_X_ = 0.0, dis_Y_ = 0.0; //各パーティクルの各マーカー間のX軸、Y軸誤差
     double radius_ = 3.0, start_angle_ = 0.0, end_angle_ = 0.0, angle_area_ = 85.2 * M_PI / 180; //ロボットの観測範囲の定義
-    //double dis_var_ = 0.2, ang_var_ = 0.2;
-    double dis_var_ = 0.000856, ang_var_ = 0.000464;
+    double dis_var_ = 0.2, ang_var_ = 0.2;
+    // double dis_var_ = 0.000856, ang_var_ = 0.000464;
     double total_weight_ = 0.0;
     bool sebscribed_robot_pose_ = false;
     bool sebscribed_landmark_pose_ = false;
