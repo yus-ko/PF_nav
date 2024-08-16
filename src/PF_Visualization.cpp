@@ -2,6 +2,7 @@
 
 std::ofstream Likelihood_txt("/home/ros/catkin_ws/src/user/src/date/simulator/Likelihood.txt");
 std::ofstream Ess_txt("/home/ros/catkin_ws/src/user/src/date/simulator/Ess.txt");
+std::ofstream Estimate_position("/home/ros/catkin_ws/src/user/src/date/simulator/Estimate_position.csv");
 
 PFVisualization::PFVisualization(/* args */)
 {
@@ -270,6 +271,8 @@ void PFVisualization::getEstimatedRobotPose()
         // particle_Norm_weight << "weight" << " " << w << " " << "total_weight" << " " << total_weight << " " << "Norm_weight" << " " << Norm_weight << " " << "Norm_total_weight" << " " << Norm_total_weight << std :: endl;
 
     }
+
+    Estimate_position << "EstX" << " " << Particle_Est_RobotX << " " << "EstY" << " " << Particle_Est_RobotY << " " << "EstTh" << " " << Particle_Est_RobotYaw << " " << std :: endl;
     
     // std::cout << "=========" << std::endl;
     // std::cout << "Particle_Est_RobotX=" <<Particle_Est_RobotX<< std::endl;
@@ -393,22 +396,22 @@ void PFVisualization::getResamplingRobotPose1(std::vector<double>& step_sum_weig
                 weight_num += 1;   
             }
         }
-        double second_noise_mean_linear_velocity = 0;
-	    double second_noise_variance_linear_velocity = 0.0001;
-	    double second_noise_mean_angular_velocity = 0;
-	    double second_noise_variance_angular_velocity = 0.0001;
+        // double second_noise_mean_linear_velocity = 0;
+	    // double second_noise_variance_linear_velocity = 0.0001;
+	    // double second_noise_mean_angular_velocity = 0;
+	    // double second_noise_variance_angular_velocity = 0.0001;
 
-        std::random_device rd2;
-        std::default_random_engine generator(rd2());
-        std::normal_distribution<double> distribution_linear_velocity(second_noise_mean_linear_velocity, sqrt(second_noise_variance_linear_velocity));
-	    std::normal_distribution<double> distribution_angular_velocity(second_noise_mean_angular_velocity, sqrt(second_noise_variance_angular_velocity));
+        // std::random_device rd2;
+        // std::default_random_engine generator(rd2());
+        // std::normal_distribution<double> distribution_linear_velocity_2(second_noise_mean_linear_velocity, sqrt(second_noise_variance_linear_velocity));
+	    // std::normal_distribution<double> distribution_angular_velocity_2(second_noise_mean_angular_velocity, sqrt(second_noise_variance_angular_velocity));
 
-        for (size_t j = 1; j < particles_.size(); ++j)
-	    {
-            particles_[j].x = particles_[j].x + distribution_linear_velocity(generator);
-            particles_[j].y = particles_[j].x + distribution_linear_velocity(generator);
-            particles_[j].yaw = particles_[j].x + distribution_angular_velocity(generator);
-	    }
+        // for (size_t j = 1; j < particles_.size(); ++j)
+	    // {
+        //     particles_[j].x = particles_[j].x + distribution_linear_velocity_2(generator);
+        //     particles_[j].y = particles_[j].x + distribution_linear_velocity_2(generator);
+        //     particles_[j].yaw = particles_[j].x + distribution_angular_velocity_2(generator);
+	    // }
     }
     std::fill(Likelihood_.begin(), Likelihood_.end(), 1.0 / particles_.size());
 }
