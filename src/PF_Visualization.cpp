@@ -147,6 +147,21 @@ void PFVisualization::normLiklihood()
 //範囲内マーカー観測プロセス
 void PFVisualization::getObservedLandmark(std::vector<int>& in_range)
 {
+    double norm_noise_mean_Scan_distance = 0;
+	double norm_noise_variance_Scan_distance = 0.1;
+	double norm_noise_mean_Scan_angle = 0;
+	double norm_noise_variance_Scan_angle = 0.1;
+
+    n.getParam("norm_noise_mean_Scan_distance", norm_noise_mean_Scan_distance);
+	n.getParam("norm_noise_variance_Scan_distance", norm_noise_variance_Scan_distance);
+	n.getParam("norm_noise_mean_Scan_angle", norm_noise_mean_Scan_angle);
+	n.getParam("norm_noise_variance_Scan_angle", norm_noise_variance_Scan_angle);
+     
+    std::random_device rd;
+    std::default_random_engine generator(rd2());
+    std::normal_distribution<double> distribution_Scan_distance(norm_noise_mean_Scan_distance, sqrt(norm_noise_variance_Scan_distance));
+	std::normal_distribution<double> distribution_Scan_angle(norm_noise_mean_Scan_angle, sqrt(norm_noise_variance_Scan_angle));
+
     in_range.clear();
     for(size_t i = 0; i < marker_positions_.size(); ++i)
     {
@@ -154,12 +169,17 @@ void PFVisualization::getObservedLandmark(std::vector<int>& in_range)
         double dx = marker_pose.position.x - robot_pose_x_;
         double dy = marker_pose.position.y - robot_pose_y_;
         Robot_distance_ = std::sqrt(dx * dx + dy * dy);
+
+        Scan_distance_ = Robot_distance_ + distribution_Scan_distance(generator);
         
         if(Robot_distance_ > radius_){
             continue;
         }
 
         Robot_angle_ = robot_pose_yaw_ - std::atan2(dy, dx);
+
+        Scan_angle_ = Robot_angle_ + distribution_Scan_angle(generator);
+
         // if (Robot_angle_ < 0){
         //     Robot_angle_ += 2 * M_PI;
         // }

@@ -47,6 +47,7 @@ private:
 
     double robot_pose_x_ = 0.0, robot_pose_y_ = 0.0, robot_pose_z_ = 0.0, robot_pose_yaw_ = 0.0; //ロボット位置の真値(定義)
     double Robot_distance_ = 0.0, Robot_angle_ = 0.0; //ロボットとマーカーの距離と角度(角度に関してはロボット座標系における角度に変更する必要あるかも)
+    double Scan_distance_ = 0.0, Scan_angle_ = 0.0; //ロボットから取得できるセンサ観測値
     double particle_position_x_ = 0.0, particle_position_y_ = 0.0, Particle_Est_RobotYaw_ = 0.0; //パーティクルの位置(使ってない)
     double dis_X_ = 0.0, dis_Y_ = 0.0; //各パーティクルの各マーカー間のX軸、Y軸誤差
     double radius_ = 3.0, start_angle_ = 0.0, end_angle_ = 0.0, angle_area_ = 85.2 * M_PI / 180; //ロボットの観測範囲の定義

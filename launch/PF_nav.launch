@@ -44,6 +44,12 @@
          <param name="norm_noise_variance_linear_velocity"     value="0.1"/>
          <param name="norm_noise_mean_angular_velocity"        value="0.0"/>
          <param name="norm_noise_variance_angular_velocity"    value="0.1"/>
+         
+         <!-- ロボット観測値のノイズパラメータ -->
+         <param name="norm_noise_mean_Scan_distance"         value="0.0"/>
+         <param name="norm_noise_variance_Scan_distance"     value="8.56e-4"/>
+         <param name="norm_noise_mean_Scan_angle"        value="0.0"/>
+         <param name="norm_noise_variance_Scan_angle"    value="4.64e-3"/>
      </node>
 
       <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find PF_nav)/rviz/PF_nav.rviz"/>
