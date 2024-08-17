@@ -147,6 +147,8 @@ void PFVisualization::normLiklihood()
 //範囲内マーカー観測プロセス
 void PFVisualization::getObservedLandmark(std::vector<int>& in_range)
 {
+    ros::NodeHandle n("~");
+
     double norm_noise_mean_Scan_distance = 0;
 	double norm_noise_variance_Scan_distance = 0.1;
 	double norm_noise_mean_Scan_angle = 0;
@@ -157,7 +159,7 @@ void PFVisualization::getObservedLandmark(std::vector<int>& in_range)
 	n.getParam("norm_noise_mean_Scan_angle", norm_noise_mean_Scan_angle);
 	n.getParam("norm_noise_variance_Scan_angle", norm_noise_variance_Scan_angle);
      
-    std::random_device rd;
+    std::random_device rd2;
     std::default_random_engine generator(rd2());
     std::normal_distribution<double> distribution_Scan_distance(norm_noise_mean_Scan_distance, sqrt(norm_noise_variance_Scan_distance));
 	std::normal_distribution<double> distribution_Scan_angle(norm_noise_mean_Scan_angle, sqrt(norm_noise_variance_Scan_angle));
